@@ -1,0 +1,26 @@
+version: '3.9'
+
+services:
+  payment:
+    container_name: ead-payment-db
+    image: postgres
+    restart: always
+    command: -p 5443
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: payment
+    volumes:
+      - payment-volume:/var/lib/postgresql
+    networks:
+      - payment-network
+    expose:
+      - '5443'
+    ports:
+      - '5443:5443'
+
+volumes:
+  payment-volume:
+
+networks:
+  payment-network:
