@@ -1,8 +1,10 @@
 package com.ead.payment.models;
 
+import com.ead.payment.dtos.PaymentEventDTO;
 import com.ead.payment.enums.PaymentControl;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.beans.BeanUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,7 +18,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -54,6 +55,14 @@ public class PaymentModel implements Serializable {
 
 
     public PaymentModel() {
+    }
+
+    public PaymentEventDTO convertToDTO() {
+        var dto = new PaymentEventDTO();
+        BeanUtils.copyProperties(this, dto);
+        dto.setPaymentControl(getPaymentControl().toString());
+        dto.setUserId(getUser().getUserId());
+        return dto;
     }
 
     public PaymentModel(UUID paymentId, PaymentControl paymentControl, LocalDateTime paymentRequestDate, LocalDateTime paymentCompletionDate, LocalDateTime paymentExpirationDate, String lastDigitsCreditCard, BigDecimal valuePaid, String paymentMessage, boolean recurrence, UserModel user) {

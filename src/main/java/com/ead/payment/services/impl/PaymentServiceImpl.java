@@ -9,6 +9,7 @@ import com.ead.payment.models.CreditCardModel;
 import com.ead.payment.models.PaymentModel;
 import com.ead.payment.models.UserModel;
 import com.ead.payment.producers.PaymentCommandPublisher;
+import com.ead.payment.producers.PaymentEventPublisher;
 import com.ead.payment.repositories.CreditCardRepository;
 import com.ead.payment.repositories.PaymentRepository;
 import com.ead.payment.repositories.UserRepository;
@@ -41,6 +42,9 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Autowired
     PaymentCommandPublisher paymentCommandPublisher;
+
+    @Autowired
+    PaymentEventPublisher paymentEventPublisher;
 
     PaymentBoundaryMock paymentBoundary = new PaymentBoundaryMock();
 
@@ -106,7 +110,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         var status = paymentBoundary.pay();
 
-        if(status == PaymentControl.EFFECTED) {
+        if (status == PaymentControl.EFFECTED) {
             payment.setPaymentControl(PaymentControl.EFFECTED);
             payment.setPaymentMessage("Payment effected with success!");
             payment.setPaymentCompletionDate(LocalDateTime.now(ZoneId.of("UTC")));
@@ -114,15 +118,15 @@ public class PaymentServiceImpl implements PaymentService {
             user.setPaymentStatus(PaymentStatus.PAYING);
             user.setLastPaymentDate(LocalDateTime.now(ZoneId.of("UTC")));
             user.setPaymentExpirationDate(LocalDateTime.now(ZoneId.of("UTC")));
-            if(user.getFirstPaymentDate() == null){
+            if (user.getFirstPaymentDate() == null) {
                 user.setFirstPaymentDate(LocalDateTime.now(ZoneId.of("UTC")));
             }
 
-        } else if(status == PaymentControl.ERROR) {
+        } else if (status == PaymentControl.ERROR) {
             payment.setPaymentControl(PaymentControl.ERROR);
             payment.setPaymentMessage("Payment with error!");
             user.setPaymentStatus(PaymentStatus.DEBTOR);
-        } else if(status == PaymentControl.REFUSED) {
+        } else if (status == PaymentControl.REFUSED) {
             payment.setPaymentControl(PaymentControl.REFUSED);
             payment.setPaymentMessage("Payment refused!");
             user.setPaymentStatus(PaymentStatus.DEBTOR);
@@ -131,5 +135,9 @@ public class PaymentServiceImpl implements PaymentService {
         paymentRepository.save(payment);
         userRepository.save(user);
 
+        if (payment.getPaymentControl().equals(PaymentControl.EFFECTED) || payment.getPaymentControl().equals(PaymentControl.REFUSED)) {
+            paymentEventPublisher.publishEventCommand(payment.convertToDTO());
+        } else if (payment.getPaymentControl().equals(PaymentControl.ERROR)) {
+        }
     }
 }
