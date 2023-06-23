@@ -137,7 +137,6 @@ public class PaymentServiceImpl implements PaymentService {
 
         if (payment.getPaymentControl().equals(PaymentControl.EFFECTED) || payment.getPaymentControl().equals(PaymentControl.REFUSED)) {
             paymentEventPublisher.publishEventCommand(payment.convertToDTO());
-        } else if (payment.getPaymentControl().equals(PaymentControl.ERROR)) {
         }
     }
 }
