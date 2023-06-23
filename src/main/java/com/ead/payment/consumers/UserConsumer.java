@@ -36,14 +36,17 @@ public class UserConsumer {
     )
     public void listenUserEvent(@Payload UserEventDTO event) {
 
-        var user = new UserModel(event.id(), event.email(), event.cpf(), event.fullName(), event.status(), event.type(), event.phone());
-
         switch (ActionType.valueOf(event.actionType())) {
-            case CREATE, UPDATE -> {
+            case CREATE -> {
+                var user = new UserModel(event.id(), event.email(), event.cpf(), event.fullName(), event.status(), event.type(), event.phone());
                 user.setPaymentStatus(PaymentStatus.NOT_STARTED);
                 service.save(user);
             }
-            case DELETE -> service.delete(user.getUserId());
+            case UPDATE -> {
+                var user = service.findById(event.id()).get();
+                service.save(new UserModel(user.getUserId(), event.email(), event.cpf(), event.fullName(), event.status(), event.type(), event.phone()));
+            }
+            case DELETE -> service.delete(event.id());
         }
     }
 }
