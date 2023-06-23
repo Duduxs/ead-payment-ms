@@ -1,5 +1,6 @@
 package com.ead.payment.services.impl;
 
+import com.ead.payment.boundaries.PaymentBoundaryMock;
 import com.ead.payment.dtos.PaymentCommandDTO;
 import com.ead.payment.dtos.PaymentRequestDTO;
 import com.ead.payment.enums.PaymentControl;
@@ -9,6 +10,7 @@ import com.ead.payment.models.UserModel;
 import com.ead.payment.producers.PaymentCommandPublisher;
 import com.ead.payment.repositories.CreditCardRepository;
 import com.ead.payment.repositories.PaymentRepository;
+import com.ead.payment.repositories.UserRepository;
 import com.ead.payment.services.PaymentService;
 import org.apache.logging.log4j.jul.LogManager;
 import org.springframework.beans.BeanUtils;
@@ -31,10 +33,15 @@ public class PaymentServiceImpl implements PaymentService {
     PaymentRepository paymentRepository;
 
     @Autowired
+    UserRepository userRepository;
+
+    @Autowired
     CreditCardRepository creditCardRepository;
 
     @Autowired
     PaymentCommandPublisher paymentCommandPublisher;
+
+    PaymentBoundaryMock paymentBoundary = new PaymentBoundaryMock();
 
     Logger logger = new LogManager().getLogger(PaymentServiceImpl.class.getName());
 
@@ -80,7 +87,6 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-
     public Page<PaymentModel> getAllPayments(UUID userId, Pageable pageable) {
         return paymentRepository.findAllBy(userId, pageable);
     }
@@ -88,5 +94,16 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public Optional<PaymentModel> findPaymentByUser(UUID userId, UUID paymentId) {
         return paymentRepository.findByUser(userId, paymentId);
+    }
+
+    @Override
+    @Transactional
+    public void makePayment(PaymentCommandDTO dto) {
+        var payment = paymentRepository.findById(dto.getPaymentId()).get();
+        var user = userRepository.findById(dto.getUserId()).get();
+        var creditCard = creditCardRepository.findById(dto.getCardId()).get();
+
+        var status = paymentBoundary.pay();
+
     }
 }

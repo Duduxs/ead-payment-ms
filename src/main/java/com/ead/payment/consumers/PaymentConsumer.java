@@ -27,7 +27,5 @@ public class PaymentConsumer {
                     key = "${ead.broker.queue.key.paymentCommand}"
             )
     )
-    public void listenPaymentCommand(@Payload PaymentCommandDTO event) {
-
-    }
+    public void listenPaymentCommand(@Payload PaymentCommandDTO event) {  }
 }
