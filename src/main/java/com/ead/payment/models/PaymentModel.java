@@ -40,7 +40,7 @@ public class PaymentModel implements Serializable {
     @Column(nullable = false)
     private LocalDateTime paymentExpirationDate;
     @Column(nullable = false, length = 4)
-    private LocalDate lastDigitsCreditCard;
+    private String lastDigitsCreditCard;
     @Column(nullable = false)
     private BigDecimal valuePaid;
     @Column(length = 150)
@@ -56,7 +56,7 @@ public class PaymentModel implements Serializable {
     public PaymentModel() {
     }
 
-    public PaymentModel(UUID paymentId, PaymentControl paymentControl, LocalDateTime paymentRequestDate, LocalDateTime paymentCompletionDate, LocalDateTime paymentExpirationDate, LocalDate lastDigitsCreditCard, BigDecimal valuePaid, String paymentMessage, boolean recurrence) {
+    public PaymentModel(UUID paymentId, PaymentControl paymentControl, LocalDateTime paymentRequestDate, LocalDateTime paymentCompletionDate, LocalDateTime paymentExpirationDate, String lastDigitsCreditCard, BigDecimal valuePaid, String paymentMessage, boolean recurrence, UserModel user) {
         this.paymentId = paymentId;
         this.paymentControl = paymentControl;
         this.paymentRequestDate = paymentRequestDate;
@@ -66,6 +66,7 @@ public class PaymentModel implements Serializable {
         this.valuePaid = valuePaid;
         this.paymentMessage = paymentMessage;
         this.recurrence = recurrence;
+        this.user = user;
     }
 
     public UUID getPaymentId() {
@@ -108,11 +109,11 @@ public class PaymentModel implements Serializable {
         this.paymentExpirationDate = paymentExpirationDate;
     }
 
-    public LocalDate getLastDigitsCreditCard() {
+    public String getLastDigitsCreditCard() {
         return lastDigitsCreditCard;
     }
 
-    public void setLastDigitsCreditCard(LocalDate lastDigitsCreditCard) {
+    public void setLastDigitsCreditCard(String lastDigitsCreditCard) {
         this.lastDigitsCreditCard = lastDigitsCreditCard;
     }
 
@@ -139,6 +140,7 @@ public class PaymentModel implements Serializable {
     public void setRecurrence(boolean recurrence) {
         this.recurrence = recurrence;
     }
+
     public UserModel getUser() {
         return user;
     }
@@ -146,5 +148,4 @@ public class PaymentModel implements Serializable {
     public void setUser(UserModel user) {
         this.user = user;
     }
-
 }

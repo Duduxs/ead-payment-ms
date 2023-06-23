@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -24,5 +25,10 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void delete(UUID userId) {
         repository.deleteById(userId);
+    }
+
+    @Override
+    public Optional<UserModel> findById(UUID id) {
+        return repository.findById(id);
     }
 }
