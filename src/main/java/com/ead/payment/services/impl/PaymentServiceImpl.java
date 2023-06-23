@@ -10,12 +10,15 @@ import com.ead.payment.repositories.PaymentRepository;
 import com.ead.payment.services.PaymentService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
@@ -55,5 +58,16 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public Optional<PaymentModel> findLastPaymentByUser(UserModel userModel) {
         return paymentRepository.findTopByUserOrderByPaymentRequestDateDesc(userModel);
+    }
+
+    @Override
+
+    public Page<PaymentModel> getAllPayments(UUID userId, Pageable pageable) {
+        return paymentRepository.findAllBy(userId, pageable);
+    }
+
+    @Override
+    public Optional<PaymentModel> findPaymentByUser(UUID userId, UUID paymentId) {
+        return paymentRepository.findByUser(userId, paymentId);
     }
 }
