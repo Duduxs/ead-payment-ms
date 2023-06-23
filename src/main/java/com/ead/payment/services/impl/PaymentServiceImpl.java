@@ -4,6 +4,7 @@ import com.ead.payment.boundaries.PaymentBoundaryMock;
 import com.ead.payment.dtos.PaymentCommandDTO;
 import com.ead.payment.dtos.PaymentRequestDTO;
 import com.ead.payment.enums.PaymentControl;
+import com.ead.payment.enums.PaymentStatus;
 import com.ead.payment.models.CreditCardModel;
 import com.ead.payment.models.PaymentModel;
 import com.ead.payment.models.UserModel;
@@ -99,11 +100,36 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @Transactional
     public void makePayment(PaymentCommandDTO dto) {
+
         var payment = paymentRepository.findById(dto.getPaymentId()).get();
         var user = userRepository.findById(dto.getUserId()).get();
-        var creditCard = creditCardRepository.findById(dto.getCardId()).get();
 
         var status = paymentBoundary.pay();
+
+        if(status == PaymentControl.EFFECTED) {
+            payment.setPaymentControl(PaymentControl.EFFECTED);
+            payment.setPaymentMessage("Payment effected with success!");
+            payment.setPaymentCompletionDate(LocalDateTime.now(ZoneId.of("UTC")));
+
+            user.setPaymentStatus(PaymentStatus.PAYING);
+            user.setLastPaymentDate(LocalDateTime.now(ZoneId.of("UTC")));
+            user.setPaymentExpirationDate(LocalDateTime.now(ZoneId.of("UTC")));
+            if(user.getFirstPaymentDate() == null){
+                user.setFirstPaymentDate(LocalDateTime.now(ZoneId.of("UTC")));
+            }
+
+        } else if(status == PaymentControl.ERROR) {
+            payment.setPaymentControl(PaymentControl.ERROR);
+            payment.setPaymentMessage("Payment with error!");
+            user.setPaymentStatus(PaymentStatus.DEBTOR);
+        } else if(status == PaymentControl.REFUSED) {
+            payment.setPaymentControl(PaymentControl.REFUSED);
+            payment.setPaymentMessage("Payment refused!");
+            user.setPaymentStatus(PaymentStatus.DEBTOR);
+        }
+
+        paymentRepository.save(payment);
+        userRepository.save(user);
 
     }
 }
