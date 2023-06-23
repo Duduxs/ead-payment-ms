@@ -1,13 +1,16 @@
 package com.ead.payment.services.impl;
 
+import com.ead.payment.dtos.PaymentCommandDTO;
 import com.ead.payment.dtos.PaymentRequestDTO;
 import com.ead.payment.enums.PaymentControl;
 import com.ead.payment.models.CreditCardModel;
 import com.ead.payment.models.PaymentModel;
 import com.ead.payment.models.UserModel;
+import com.ead.payment.producers.PaymentCommandPublisher;
 import com.ead.payment.repositories.CreditCardRepository;
 import com.ead.payment.repositories.PaymentRepository;
 import com.ead.payment.services.PaymentService;
+import org.apache.logging.log4j.jul.LogManager;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,6 +22,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
@@ -28,6 +32,11 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Autowired
     CreditCardRepository creditCardRepository;
+
+    @Autowired
+    PaymentCommandPublisher paymentCommandPublisher;
+
+    Logger logger = new LogManager().getLogger(PaymentServiceImpl.class.getName());
 
     @Override
     @Transactional
@@ -51,6 +60,16 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setLastDigitsCreditCard(dto.getCreditCardNumber().substring(dto.getCreditCardNumber().length() - 4));
         payment.setUser(userModelOptional);
         paymentRepository.save(payment);
+
+        try {
+            var paymentCommandDTO = new PaymentCommandDTO();
+            paymentCommandDTO.setUserId(userModelOptional.getUserId());
+            paymentCommandDTO.setPaymentId(payment.getPaymentId());
+            paymentCommandDTO.setCardId(creditCardModel.getCardId());
+            paymentCommandPublisher.publishPaymentCommand(paymentCommandDTO);
+        } catch (Exception e) {
+            logger.warning("Error sending payment command!");
+        }
 
         return payment;
     }
