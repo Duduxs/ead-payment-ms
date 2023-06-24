@@ -51,7 +51,6 @@ public class PaymentServiceImpl implements PaymentService {
     Logger logger = new LogManager().getLogger(PaymentServiceImpl.class.getName());
 
     @Override
-    @Transactional
     public PaymentModel requestPayment(PaymentRequestDTO dto, UserModel userModelOptional) {
 
         var creditCardModel = new CreditCardModel();

@@ -54,7 +54,7 @@ public class PaymentController {
     @GetMapping("/users/{userId}/payments")
     public ResponseEntity<Page<PaymentModel>> getAllPayments(
             @PathVariable UUID userId,
-            @PageableDefault(page = 0, size = 10, sort = "paymentId", direction = DESC) Pageable pageable
+            @PageableDefault(page = 0, size = 10, sort = "payment_id", direction = DESC) Pageable pageable
     ) {
         return ResponseEntity.ok(paymentService.getAllPayments(userId, pageable));
     }

@@ -44,7 +44,12 @@ public class UserConsumer {
             }
             case UPDATE -> {
                 var user = service.findById(event.id()).get();
-                service.save(new UserModel(user.getUserId(), event.email(), event.cpf(), event.fullName(), event.status(), event.type(), event.phone()));
+                var newUser = new UserModel(user.getUserId(), event.email(), event.cpf(), event.fullName(), event.status(), event.type(), event.phone());
+                newUser.setPaymentStatus(user.getPaymentStatus());
+                newUser.setPaymentExpirationDate(user.getPaymentExpirationDate());
+                newUser.setFirstPaymentDate(user.getFirstPaymentDate());
+                newUser.setLastPaymentDate(user.getLastPaymentDate());
+                service.save(newUser);
             }
             case DELETE -> service.delete(event.id());
         }

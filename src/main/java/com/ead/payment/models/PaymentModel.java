@@ -36,13 +36,13 @@ public class PaymentModel implements Serializable {
     private PaymentControl paymentControl;
     @Column(nullable = false)
     private LocalDateTime paymentRequestDate;
-    @Column(nullable = false)
+    @Column(nullable = true)
     private LocalDateTime paymentCompletionDate;
     @Column(nullable = false)
     private LocalDateTime paymentExpirationDate;
     @Column(nullable = false, length = 4)
     private String lastDigitsCreditCard;
-    @Column(nullable = false)
+    @Column(nullable = true)
     private BigDecimal valuePaid;
     @Column(length = 150)
     private String paymentMessage;
